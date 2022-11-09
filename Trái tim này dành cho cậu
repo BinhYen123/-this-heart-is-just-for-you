@@ -1,41 +1,40 @@
-Mã số
-<! DOCTYPE HTML PUBLIC "- // W3C // DTD HTML 4.0 Chuyển tiếp // EN">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 
 <HTML>
 
- <HẾT>
+ <HEAD>
 
-  <TITLE> Tài liệu mới </TITLE>
+  <TITLE> New Document </TITLE>
 
-  <META NAME = "Trình tạo" CONTENT = "EditPlus">
+  <META NAME="Generator" CONTENT="EditPlus">
 
-  <META NAME = "Tác giả" CONTENT = "">
+  <META NAME="Author" CONTENT="">
 
-  <META NAME = "Từ khóa" CONTENT = "">
+  <META NAME="Keywords" CONTENT="">
 
-  <META NAME = "Mô tả" CONTENT = "">
+  <META NAME="Description" CONTENT="">
 
-  <kiểu>
+  <style>
 
-  html, nội dung {
+  html, body {
 
-  chiều cao: 100%;
+  height: 100%;
 
-  đệm: 0;
+  padding: 0;
 
-  lề: 0;
+  margin: 0;
 
-  nền: # 000;
+  background: #000;
 
 }
 
-Tranh sơn dầu {
+canvas {
 
-  vị trí: tuyệt đối;
+  position: absolute;
 
-  chiều rộng: 100%;
+  width: 100%;
 
-  chiều cao: 100%;
+  height: 100%;
 
 }
 
@@ -46,120 +45,120 @@ Tranh sơn dầu {
 
  <BODY>
 
-  <canvas id = "pinkboard"> </canvas>
+  <canvas id="pinkboard"></canvas>
 
   <script>
 
-  / *
+  /*
 
- * Cài đặt
+ * Settings
 
- * /
+ */
 
 var settings = {
 
-  vật rất nhỏ: {
+  particles: {
 
-    chiều dài: 500, // lượng hạt tối đa
+    length:   500, // maximum amount of particles
 
-    thời lượng: 2, // thời lượng hạt tính bằng giây
+    duration:   2, // particle duration in sec
 
-    vận tốc: 100, // vận tốc hạt tính bằng pixel / giây
+    velocity: 100, // particle velocity in pixels/sec
 
-    effect: -0,75, // chơi với cái này để có hiệu ứng đẹp
+    effect: -0.75, // play with this for a nice effect
 
-    size: 30, // kích thước hạt tính bằng pixel
+    size:      30, // particle size in pixels
 
   },
 
 };
 
 
-/ *
+/*
 
- * RequestAnimationFrame polyfill bởi Erik Möller
+ * RequestAnimationFrame polyfill by Erik Möller
 
- * /
+ */
 
-(function () {var b = 0; var c = ["ms", "moz", "webkit", "o"]; for (var a = 0; a <c.length &&! window.requestAnimationFrame; ++ a) {window.requestAnimationFrame = window [c [a] + "RequestAnimationFrame"]; window.cancelAnimationFrame = window [c [a] + "CancelAnimationFrame"] || window [c [a] + "CancelRequestAnimationFrame"]} nếu ( ! window.requestAnimationFrame) {window.requestAnimationFrame = function (h, e) {var d = new Date (). getTime (); var f = Math.max (0,16- (db)); var g = window. setTimeout (function () {h (d + f)}, f); b = d + f; return g}} if (! window.cancelAnimationFrame) {window.cancelAnimationFrame = function (d) {clearTimeout (d)}} } ());
+(function(){var b=0;var c=["ms","moz","webkit","o"];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+"RequestAnimationFrame"];window.cancelAnimationFrame=window[c[a]+"CancelAnimationFrame"]||window[c[a]+"CancelRequestAnimationFrame"]}if(!window.requestAnimationFrame){window.requestAnimationFrame=function(h,e){var d=new Date().getTime();var f=Math.max(0,16-(d-b));var g=window.setTimeout(function(){h(d+f)},f);b=d+f;return g}}if(!window.cancelAnimationFrame){window.cancelAnimationFrame=function(d){clearTimeout(d)}}}());
 
 
-/ *
+/*
 
- * Lớp điểm
+ * Point class
 
- * /
+ */
 
-var Point = (function () {
+var Point = (function() {
 
-  function Point (x, y) {
+  function Point(x, y) {
 
-    this.x = (typeof x! == 'undefined')? x: 0;
+    this.x = (typeof x !== 'undefined') ? x : 0;
 
-    this.y = (typeof y! == 'undefined')? y: 0;
+    this.y = (typeof y !== 'undefined') ? y : 0;
 
   }
 
-  Point.prototype.clone = function () {
+  Point.prototype.clone = function() {
 
-    trả về Điểm mới (this.x, this.y);
+    return new Point(this.x, this.y);
 
   };
 
-  Point.prototype.length = function (length) {
+  Point.prototype.length = function(length) {
 
     if (typeof length == 'undefined')
 
-      return Math.sqrt (this.x * this.x + this.y * this.y);
+      return Math.sqrt(this.x * this.x + this.y * this.y);
 
-    this.normalize ();
+    this.normalize();
 
-    this.x * = length;
+    this.x *= length;
 
-    this.y * = length;
+    this.y *= length;
 
-    trả lại cái này;
-
-  };
-
-  Point.prototype.normalize = function () {
-
-    var length = this.length ();
-
-    this.x / = length;
-
-    this.y / = length;
-
-    trả lại cái này;
+    return this;
 
   };
 
-  điểm trở lại;
+  Point.prototype.normalize = function() {
 
-}) ();
+    var length = this.length();
+
+    this.x /= length;
+
+    this.y /= length;
+
+    return this;
+
+  };
+
+  return Point;
+
+})();
 
 
-/ *
+/*
 
- * Lớp hạt
+ * Particle class
 
- * /
+ */
 
-var Particle = (function () {
+var Particle = (function() {
 
-  function Particle () {
+  function Particle() {
 
-    this.position = new Point ();
+    this.position = new Point();
 
-    this.velocity = new Point ();
+    this.velocity = new Point();
 
-    this.acceleration = new Point ();
+    this.acceleration = new Point();
 
     this.age = 0;
 
   }
 
-  Particle.prototype.initialize = function (x, y, dx, dy) {
+  Particle.prototype.initialize = function(x, y, dx, dy) {
 
     this.position.x = x;
 
@@ -177,98 +176,98 @@ var Particle = (function () {
 
   };
 
-  Particle.prototype.update = function (deltaTime) {
+  Particle.prototype.update = function(deltaTime) {
 
-    this.position.x + = this.velocity.x * deltaTime;
+    this.position.x += this.velocity.x * deltaTime;
 
-    this.position.y + = this.velocity.y * deltaTime;
+    this.position.y += this.velocity.y * deltaTime;
 
-    this.velocity.x + = this.acceleration.x * deltaTime;
+    this.velocity.x += this.acceleration.x * deltaTime;
 
-    this.velocity.y + = this.acceleration.y * deltaTime;
+    this.velocity.y += this.acceleration.y * deltaTime;
 
-    this.age + = deltaTime;
+    this.age += deltaTime;
 
   };
 
-  Particle.prototype.draw = function (context, image) {
+  Particle.prototype.draw = function(context, image) {
 
-    chức năng dễ dàng (t) {
+    function ease(t) {
 
       return (--t) * t * t + 1;
 
     }
 
-    var size = image.width * easy (this.age / settings.particles.duration);
+    var size = image.width * ease(this.age / settings.particles.duration);
 
     context.globalAlpha = 1 - this.age / settings.particles.duration;
 
-    context.drawImage (image, this.position.x - size / 2, this.position.y - size / 2, size, size);
+    context.drawImage(image, this.position.x - size / 2, this.position.y - size / 2, size, size);
 
   };
 
-  trả lại hạt;
+  return Particle;
 
-}) ();
+})();
 
 
-/ *
+/*
 
- * Lớp ParticlePool
+ * ParticlePool class
 
- * /
+ */
 
-var ParticlePool = (function () {
+var ParticlePool = (function() {
 
-  hạt var,
+  var particles,
 
       firstActive = 0,
 
-      firstFree = 0,
+      firstFree   = 0,
 
-      thời lượng = settings.particles.duration;
+      duration    = settings.particles.duration;
 
  
 
-  function ParticlePool (chiều dài) {
+  function ParticlePool(length) {
 
-    // tạo và điền nhóm hạt
+    // create and populate particle pool
 
-    hạt = new Array (chiều dài);
+    particles = new Array(length);
 
-    for (var i = 0; i <ticles.length; i ++)
+    for (var i = 0; i < particles.length; i++)
 
-      hạt [i] = new Particle ();
+      particles[i] = new Particle();
 
   }
 
-  ParticlePool.prototype.add = function (x, y, dx, dy) {
+  ParticlePool.prototype.add = function(x, y, dx, dy) {
 
-    hạt [firstFree] .initialize (x, y, dx, dy);
+    particles[firstFree].initialize(x, y, dx, dy);
 
    
 
-    // xử lý hàng đợi vòng tròn
+    // handle circular queue
 
-    firstFree ++;
+    firstFree++;
 
-    if (firstFree ==ticles.length) firstFree = 0;
+    if (firstFree   == particles.length) firstFree   = 0;
 
-    if (firstActive == firstFree) firstActive ++;
+    if (firstActive == firstFree       ) firstActive++;
 
-    if (firstActive ==ticles.length) firstActive = 0;
+    if (firstActive == particles.length) firstActive = 0;
 
   };
 
-  ParticlePool.prototype.update = function (deltaTime) {
+  ParticlePool.prototype.update = function(deltaTime) {
 
     var i;
 
    
 
-    // cập nhật các hạt hoạt động
+    // update active particles
 
-    if (firstActive <firstFree) {
+    if (firstActive < firstFree) {
 
       for (i = firstActive; i < firstFree; i++)
 
@@ -520,7 +519,5 @@ var ParticlePool = (function () {
  </BODY>
 
 </HTML>
-
-
 
 
